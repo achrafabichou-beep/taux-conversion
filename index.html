@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -475,15 +475,15 @@
 <!-- ═══════════════ SCREEN: COMPTEUR ═══════════════ -->
 <div id="screen-counter" class="screen active">
 
-    <div class="section-label">Photographe</div>
+    <div class="section-label">Photographer</div>
     <select class="photographer-select" id="photographerSelect" onchange="onPhotographerChange()">
-        <option value="">— Sélectionner —</option>
+        <option value="">— Select —</option>
     </select>
 
     <!-- No photographer selected -->
     <div id="no-photographer" class="no-photographer">
         <div class="big-icon">📸</div>
-        <p>Sélectionne un photographe<br>pour commencer à compter</p>
+        <p>Select a photographer<br>to start counting</p>
     </div>
 
     <!-- Counter content (shown when photographer selected) -->
@@ -492,19 +492,19 @@
         <!-- Session dates -->
         <div class="session-bar">
             <div class="session-date">
-                <span class="lbl">Début de session</span>
+                <span class="lbl">Session Start</span>
                 <span class="val" id="sessionStart">—</span>
             </div>
             <div class="session-date" style="text-align:right">
-                <span class="lbl">Maintenant</span>
+                <span class="lbl">Now</span>
                 <span class="val" id="sessionNow">—</span>
             </div>
         </div>
 
-        <!-- Taux de conversion -->
+        <!-- Conversion rate -->
         <div class="conversion-display">
             <div class="big-num" id="convRate">—</div>
-            <div class="conv-sub">approches par réservation</div>
+            <div class="conv-sub">approach per booking</div>
         </div>
 
         <!-- Stats -->
@@ -519,7 +519,7 @@
             </div>
             <div class="stat-card c-red">
                 <div class="sv" id="statMissed">0</div>
-                <div class="sl">Non booké</div>
+                <div class="sl">Not booked</div>
             </div>
         </div>
 
@@ -533,19 +533,19 @@
         <div class="action-buttons">
             <button class="action-btn btn-red" onclick="record(false)">
                 <span class="btn-icon">✕</span>
-                <span>Non booké</span>
+                <span>Not booked</span>
             </button>
             <button class="action-btn btn-green" onclick="record(true)">
                 <span class="btn-icon">✓</span>
-                <span>Booké !</span>
+                <span>Booked !</span>
             </button>
         </div>
 
         <!-- Undo -->
-        <button class="undo-btn" onclick="undo()">↩ Annuler la dernière entrée</button>
+        <button class="undo-btn" onclick="undo()">↩ Cancel last entry</button>
 
         <!-- New session -->
-        <button class="reset-btn" onclick="openResetModal()">🔄 Nouvelle session (reset)</button>
+        <button class="reset-btn" onclick="openResetModal()">🔄 New session (reset)</button>
 
     </div>
 </div>
@@ -553,8 +553,8 @@
 <!-- ═══════════════ SCREEN: HISTORIQUE ═══════════════ -->
 <div id="screen-history" class="screen">
     <div class="filter-tabs">
-        <div class="filter-tab active" id="tab-sessions"     onclick="setFilter('sessions',this)">Par session</div>
-        <div class="filter-tab"        id="tab-photographers" onclick="setFilter('photographers',this)">Par photographe</div>
+        <div class="filter-tab active" id="tab-sessions"     onclick="setFilter('sessions',this)">Per session</div>
+        <div class="filter-tab"        id="tab-photographers" onclick="setFilter('photographers',this)">Per photographer</div>
     </div>
     <div id="historyContent"></div>
 </div>
@@ -563,10 +563,10 @@
 <div id="screen-settings" class="screen">
 
     <div class="settings-section">
-        <div class="section-label">Photographes</div>
+        <div class="section-label">Photographers</div>
         <div id="photographersList"></div>
         <div class="add-form">
-            <input type="text" class="input-field" id="newPhotographerInput" placeholder="Prénom du photographe" maxlength="30">
+            <input type="text" class="input-field" id="newPhotographerInput" placeholder="Photographer name" maxlength="30">
             <button class="add-btn" onclick="addPhotographer()">+</button>
         </div>
     </div>
@@ -577,7 +577,7 @@
         <div class="section-label">Lieux</div>
         <div id="locationsList"></div>
         <div class="add-form">
-            <input type="text" class="input-field" id="newLocationInput" placeholder="Nouveau lieu" maxlength="20">
+            <input type="text" class="input-field" id="newLocationInput" placeholder="New location" maxlength="20">
             <button class="add-btn" onclick="addLocation()">+</button>
         </div>
     </div>
@@ -586,7 +586,7 @@
 
     <div class="settings-section">
         <div class="section-label">Danger</div>
-        <button class="danger-btn" onclick="openClearModal()">🗑️ Effacer toutes les données</button>
+        <button class="danger-btn" onclick="openClearModal()">🗑️ Clear all datas</button>
     </div>
 
 </div>
@@ -620,7 +620,7 @@
 <!-- Reset modal -->
 <div id="resetModal" class="modal-overlay">
     <div class="modal">
-        <h3>🔄 Nouvelle session</h3>
+        <h3>🔄 New session</h3>
         <p>La session actuelle sera archivée dans l'historique et les compteurs seront remis à zéro.</p>
         <div class="modal-actions">
             <button class="modal-btn cancel"  onclick="closeModal('resetModal')">Annuler</button>
@@ -632,7 +632,7 @@
 <!-- Clear all modal -->
 <div id="clearModal" class="modal-overlay">
     <div class="modal">
-        <h3>⚠️ Effacer toutes les données</h3>
+        <h3>⚠️ Erase all datas</h3>
         <p>Cette action supprimera définitivement toutes les sessions, l'historique complet et la liste des photographes. Irréversible.</p>
         <div class="modal-actions">
             <button class="modal-btn cancel" onclick="closeModal('clearModal')">Annuler</button>
@@ -660,7 +660,7 @@
 <script>
 // ── CONSTANTS ─────────────────────────────────────────────
 const STORAGE_KEY   = 'phconvertrate_v1';
-const DEFAULT_LOCS  = ['Piscine', 'Plage', 'Bar', 'Lobby', 'Restaurant'];
+const DEFAULT_LOCS  = ['Pool', 'Beach', 'Bar', 'Lobby', 'Entrée Resto' ];
 
 // ── STATE ──────────────────────────────────────────────────
 let db              = loadDB();
