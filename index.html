@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PHconvertRate</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --bg-primary:   #0d0d14;
+            --bg-secondary: #16162a;
+            --bg-card:      #1c1c34;
+            --accent:       #e94560;
+            --green:        #27ae60;
+            --red:          #e74c3c;
+            --text-primary: #eaeaea;
+            --text-muted:   #8a8aaa;
+            --border:       #2a2a4a;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            max-width: 480px;
+            margin: 0 auto;
+            overflow-x: hidden;
+        }
+
+        /* ── HEADER ── */
+        .header {
+            background: var(--bg-secondary);
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header h1 {
+            font-size: 19px;
+            font-weight: 800;
+            color: var(--accent);
+            letter-spacing: 1px;
+        }
+        .header-actions { display: flex; gap: 8px; }
+        .icon-btn {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            width: 36px;
+            height: 36px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.15s;
+        }
+        .icon-btn:active { background: var(--border); }
+
+        /* ── SCREENS ── */
+        .screen { display: none; padding: 18px; padding-bottom: 90px; }
+        .screen.active { display: block; }
+
+        /* ── BOTTOM NAV ── */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 480px;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+            display: flex;
+            z-index: 100;
+        }
+        .nav-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            padding: 11px 8px 9px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            font-size: 10px;
+            transition: color 0.2s;
+        }
+        .nav-btn.active { color: var(--accent); }
+        .nav-btn svg { width: 22px; height: 22px; }
+
+        /* ── PHOTOGRAPHER SELECTOR ── */
+        .section-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 8px;
+        }
+        .photographer-select {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            font-size: 16px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            width: 100%;
+            margin-bottom: 16px;
+            appearance: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+        .photographer-select:focus { outline: none; border-color: var(--accent); }
+
+        /* ── SESSION INFO BAR ── */
+        .session-bar {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 11px 16px;
+            margin-bottom: 14px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .session-date .lbl { font-size: 11px; color: var(--text-muted); display: block; }
+        .session-date .val { font-size: 13px; font-weight: 600; }
+
+        /* ── CONVERSION DISPLAY ── */
+        .conversion-display {
+            background: linear-gradient(135deg, var(--bg-card), var(--bg-secondary));
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 18px;
+            text-align: center;
+            margin-bottom: 14px;
+        }
+        .conversion-display .big-num {
+            font-size: 64px;
+            font-weight: 900;
+            color: var(--accent);
+            line-height: 1;
+        }
+        .conversion-display .conv-sub {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* ── STATS ROW ── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 9px;
+            margin-bottom: 16px;
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 12px 8px;
+            text-align: center;
+        }
+        .stat-card .sv { font-size: 26px; font-weight: 800; line-height: 1; margin-bottom: 3px; }
+        .stat-card .sl { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px; }
+        .stat-card.c-green .sv { color: var(--green); }
+        .stat-card.c-red   .sv { color: var(--red); }
+        .stat-card.c-grey  .sv { color: var(--text-primary); }
+
+        /* ── LOCATION PILLS ── */
+        .location-section { margin-bottom: 16px; }
+        .location-pills { display: flex; gap: 7px; flex-wrap: wrap; }
+        .location-pill {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 7px 13px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.15s;
+            user-select: none;
+        }
+        .location-pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+        /* ── ACTION BUTTONS ── */
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+        .action-btn {
+            height: 130px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 700;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            transition: transform 0.08s, filter 0.1s;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        .action-btn:active { transform: scale(0.94); filter: brightness(0.9); }
+        .action-btn .btn-icon { font-size: 40px; line-height: 1; }
+        .action-btn.btn-red   { background: linear-gradient(145deg,#e74c3c,#c0392b); box-shadow: 0 6px 22px rgba(231,76,60,0.38); }
+        .action-btn.btn-green { background: linear-gradient(145deg,#27ae60,#1e8449); box-shadow: 0 6px 22px rgba(39,174,96,0.38); }
+
+        /* ── SECONDARY ACTIONS ── */
+        .undo-btn {
+            width: 100%;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            text-align: center;
+            margin-bottom: 10px;
+            transition: background 0.15s;
+        }
+        .undo-btn:active { background: var(--border); }
+        .reset-btn {
+            width: 100%;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: background 0.15s;
+        }
+        .reset-btn:active { background: var(--border); }
+
+        /* ── NO PHOTOGRAPHER ── */
+        .no-photographer { text-align: center; padding: 50px 20px; color: var(--text-muted); }
+        .no-photographer .big-icon { font-size: 52px; margin-bottom: 14px; }
+        .no-photographer p { font-size: 15px; line-height: 1.6; }
+
+        /* ── HISTORY ── */
+        .filter-tabs { display: flex; gap: 8px; margin-bottom: 14px; }
+        .filter-tab {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 8px 18px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.15s;
+        }
+        .filter-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+        .session-card {
+            background: var(--bg-card);
+            border-radius: 13px;
+            padding: 15px 16px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border);
+        }
+        .session-card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+        .session-card-name { font-weight: 700; font-size: 15px; }
+        .session-card-rate { font-size: 24px; font-weight: 900; color: var(--accent); }
+        .session-card-dates { font-size: 11px; color: var(--text-muted); margin-bottom: 8px; }
+        .session-card-stats { display: flex; gap: 14px; }
+        .sstat { font-size: 12px; color: var(--text-muted); }
+        .sstat span { font-weight: 600; color: var(--text-primary); }
+
+        .photo-summary {
+            background: var(--bg-card);
+            border-radius: 13px;
+            padding: 15px 16px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border);
+        }
+        .photo-summary-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .photo-summary-name { font-weight: 700; font-size: 16px; }
+        .photo-summary-rate { font-size: 26px; font-weight: 900; color: var(--accent); }
+        .photo-summary-stats { display: flex; gap: 14px; }
+
+        .empty-state { text-align: center; padding: 50px 20px; color: var(--text-muted); font-size: 14px; }
+
+        /* ── SETTINGS ── */
+        .settings-section { margin-bottom: 24px; }
+        .list-item {
+            background: var(--bg-card);
+            border-radius: 10px;
+            padding: 12px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            border: 1px solid var(--border);
+            font-size: 14px;
+        }
+        .del-btn {
+            background: none;
+            border: none;
+            color: var(--red);
+            cursor: pointer;
+            font-size: 17px;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            transition: background 0.15s;
+        }
+        .del-btn:active { background: rgba(231,76,60,0.15); }
+        .add-form { display: flex; gap: 8px; margin-top: 4px; }
+        .input-field {
+            flex: 1;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 11px 14px;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+        .input-field:focus { outline: none; border-color: var(--accent); }
+        .add-btn {
+            background: var(--accent);
+            border: none;
+            color: #fff;
+            padding: 11px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 20px;
+            font-weight: 700;
+            transition: filter 0.15s;
+        }
+        .add-btn:active { filter: brightness(0.85); }
+
+        .danger-btn {
+            width: 100%;
+            background: rgba(231,76,60,0.08);
+            border: 1px solid var(--red);
+            color: var(--red);
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: background 0.15s;
+        }
+        .danger-btn:active { background: rgba(231,76,60,0.18); }
+
+        /* ── MODALS ── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.72);
+            display: none;
+            align-items: flex-end;
+            z-index: 200;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal {
+            background: var(--bg-secondary);
+            border-radius: 20px 20px 0 0;
+            padding: 22px 18px 28px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal h3 { font-size: 17px; margin-bottom: 10px; }
+        .modal p  { font-size: 14px; color: var(--text-muted); line-height: 1.55; }
+        .modal-actions { display: flex; gap: 10px; margin-top: 18px; }
+        .modal-btn {
+            flex: 1;
+            padding: 13px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: filter 0.15s;
+        }
+        .modal-btn:active { filter: brightness(0.88); }
+        .modal-btn.cancel   { background: var(--bg-card); color: var(--text-primary); }
+        .modal-btn.confirm  { background: var(--accent); color: #fff; }
+        .modal-btn.danger   { background: var(--red); color: #fff; }
+
+        /* Export preview */
+        .export-preview {
+            background: var(--bg-card);
+            border-radius: 10px;
+            padding: 14px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.9;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            white-space: pre-wrap;
+            max-height: 280px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+        }
+
+        /* ── TOAST ── */
+        .toast {
+            position: fixed;
+            bottom: 82px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            padding: 9px 20px;
+            border-radius: 30px;
+            font-size: 13px;
+            z-index: 300;
+            border: 1px solid var(--border);
+            opacity: 0;
+            transition: opacity 0.25s;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        .toast.show { opacity: 1; }
+
+        /* ── DIVIDER ── */
+        .divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+        select option { background: var(--bg-secondary); }
+    </style>
+</head>
+<body>
+
+<!-- ═══════════════ HEADER ═══════════════ -->
+<div class="header">
+    <h1>PHconvertRate</h1>
+    <div class="header-actions">
+        <button class="icon-btn" onclick="openExportModal()" title="Exporter">📤</button>
+    </div>
+</div>
+
+<!-- ═══════════════ SCREEN: COMPTEUR ═══════════════ -->
+<div id="screen-counter" class="screen active">
+
+    <div class="section-label">Photographe</div>
+    <select class="photographer-select" id="photographerSelect" onchange="onPhotographerChange()">
+        <option value="">— Sélectionner —</option>
+    </select>
+
+    <!-- No photographer selected -->
+    <div id="no-photographer" class="no-photographer">
+        <div class="big-icon">📸</div>
+        <p>Sélectionne un photographe<br>pour commencer à compter</p>
+    </div>
+
+    <!-- Counter content (shown when photographer selected) -->
+    <div id="counter-content" style="display:none">
+
+        <!-- Session dates -->
+        <div class="session-bar">
+            <div class="session-date">
+                <span class="lbl">Début de session</span>
+                <span class="val" id="sessionStart">—</span>
+            </div>
+            <div class="session-date" style="text-align:right">
+                <span class="lbl">Maintenant</span>
+                <span class="val" id="sessionNow">—</span>
+            </div>
+        </div>
+
+        <!-- Taux de conversion -->
+        <div class="conversion-display">
+            <div class="big-num" id="convRate">—</div>
+            <div class="conv-sub">approches par réservation</div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card c-grey">
+                <div class="sv" id="statTotal">0</div>
+                <div class="sl">Approches</div>
+            </div>
+            <div class="stat-card c-green">
+                <div class="sv" id="statBooked">0</div>
+                <div class="sl">Bookings</div>
+            </div>
+            <div class="stat-card c-red">
+                <div class="sv" id="statMissed">0</div>
+                <div class="sl">Non booké</div>
+            </div>
+        </div>
+
+        <!-- Location pills -->
+        <div class="location-section">
+            <div class="section-label">Lieu (optionnel)</div>
+            <div class="location-pills" id="locationPills"></div>
+        </div>
+
+        <!-- Main action buttons -->
+        <div class="action-buttons">
+            <button class="action-btn btn-red" onclick="record(false)">
+                <span class="btn-icon">✕</span>
+                <span>Non booké</span>
+            </button>
+            <button class="action-btn btn-green" onclick="record(true)">
+                <span class="btn-icon">✓</span>
+                <span>Booké !</span>
+            </button>
+        </div>
+
+        <!-- Undo -->
+        <button class="undo-btn" onclick="undo()">↩ Annuler la dernière entrée</button>
+
+        <!-- New session -->
+        <button class="reset-btn" onclick="openResetModal()">🔄 Nouvelle session (reset)</button>
+
+    </div>
+</div>
+
+<!-- ═══════════════ SCREEN: HISTORIQUE ═══════════════ -->
+<div id="screen-history" class="screen">
+    <div class="filter-tabs">
+        <div class="filter-tab active" id="tab-sessions"     onclick="setFilter('sessions',this)">Par session</div>
+        <div class="filter-tab"        id="tab-photographers" onclick="setFilter('photographers',this)">Par photographe</div>
+    </div>
+    <div id="historyContent"></div>
+</div>
+
+<!-- ═══════════════ SCREEN: RÉGLAGES ═══════════════ -->
+<div id="screen-settings" class="screen">
+
+    <div class="settings-section">
+        <div class="section-label">Photographes</div>
+        <div id="photographersList"></div>
+        <div class="add-form">
+            <input type="text" class="input-field" id="newPhotographerInput" placeholder="Prénom du photographe" maxlength="30">
+            <button class="add-btn" onclick="addPhotographer()">+</button>
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="settings-section">
+        <div class="section-label">Lieux</div>
+        <div id="locationsList"></div>
+        <div class="add-form">
+            <input type="text" class="input-field" id="newLocationInput" placeholder="Nouveau lieu" maxlength="20">
+            <button class="add-btn" onclick="addLocation()">+</button>
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="settings-section">
+        <div class="section-label">Danger</div>
+        <button class="danger-btn" onclick="openClearModal()">🗑️ Effacer toutes les données</button>
+    </div>
+
+</div>
+
+<!-- ═══════════════ BOTTOM NAV ═══════════════ -->
+<div class="bottom-nav">
+    <button class="nav-btn active" id="nav-counter" onclick="showScreen('counter')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+        </svg>
+        Compteur
+    </button>
+    <button class="nav-btn" id="nav-history" onclick="showScreen('history')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+        Historique
+    </button>
+    <button class="nav-btn" id="nav-settings" onclick="showScreen('settings')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+        Réglages
+    </button>
+</div>
+
+<!-- ═══════════════ MODALS ═══════════════ -->
+
+<!-- Reset modal -->
+<div id="resetModal" class="modal-overlay">
+    <div class="modal">
+        <h3>🔄 Nouvelle session</h3>
+        <p>La session actuelle sera archivée dans l'historique et les compteurs seront remis à zéro.</p>
+        <div class="modal-actions">
+            <button class="modal-btn cancel"  onclick="closeModal('resetModal')">Annuler</button>
+            <button class="modal-btn confirm" onclick="confirmReset()">Démarrer</button>
+        </div>
+    </div>
+</div>
+
+<!-- Clear all modal -->
+<div id="clearModal" class="modal-overlay">
+    <div class="modal">
+        <h3>⚠️ Effacer toutes les données</h3>
+        <p>Cette action supprimera définitivement toutes les sessions, l'historique complet et la liste des photographes. Irréversible.</p>
+        <div class="modal-actions">
+            <button class="modal-btn cancel" onclick="closeModal('clearModal')">Annuler</button>
+            <button class="modal-btn danger" onclick="confirmClearAll()">Tout effacer</button>
+        </div>
+    </div>
+</div>
+
+<!-- Export modal -->
+<div id="exportModal" class="modal-overlay">
+    <div class="modal">
+        <h3>📤 Rapport de stats</h3>
+        <div class="export-preview" id="exportPreview"></div>
+        <div class="modal-actions">
+            <button class="modal-btn cancel"  onclick="closeModal('exportModal')">Fermer</button>
+            <button class="modal-btn confirm" style="background:#2563eb" onclick="shareExport()">Partager / Copier</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+<!-- ═══════════════ SCRIPT ═══════════════ -->
+<script>
+// ── CONSTANTS ─────────────────────────────────────────────
+const STORAGE_KEY   = 'phconvertrate_v1';
+const DEFAULT_LOCS  = ['Piscine', 'Plage', 'Bar', 'Lobby', 'Restaurant'];
+
+// ── STATE ──────────────────────────────────────────────────
+let db              = loadDB();
+let currentPhoto    = '';
+let selectedLoc     = '';
+let histFilter      = 'sessions';
+let clockTimer      = null;
+
+// ── STORAGE ────────────────────────────────────────────────
+function loadDB() {
+    try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || freshDB();
+    } catch(e) { return freshDB(); }
+}
+function freshDB() {
+    return { photographers: [], locations: [...DEFAULT_LOCS], sessions: [], active: {} };
+}
+function save() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+}
+
+// ── UTILS ──────────────────────────────────────────────────
+function uid()  { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function fmtDT(d) {
+    d = d instanceof Date ? d : new Date(d);
+    return d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'}) + ' ' +
+           d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+}
+function fmtD(d) {
+    d = d instanceof Date ? d : new Date(d);
+    return d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'});
+}
+
+function stats(approaches) {
+    const total  = approaches.length;
+    const booked = approaches.filter(a => a.booked).length;
+    const missed = total - booked;
+    const rate   = booked > 0 ? (total / booked).toFixed(1) : '—';
+    return { total, booked, missed, rate };
+}
+
+// ── TOAST ──────────────────────────────────────────────────
+let toastTid;
+function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTid);
+    toastTid = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+// ── MODALS ─────────────────────────────────────────────────
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+document.querySelectorAll('.modal-overlay').forEach(o => {
+    o.addEventListener('click', e => { if (e.target === o) closeModal(o.id); });
+});
+
+// ── SCREENS ────────────────────────────────────────────────
+function showScreen(name) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('screen-' + name).classList.add('active');
+    document.getElementById('nav-'    + name).classList.add('active');
+    if (name === 'history')  renderHistory();
+    if (name === 'settings') renderSettings();
+}
+
+// ── PHOTOGRAPHER SELECT ────────────────────────────────────
+function renderSelect() {
+    const sel = document.getElementById('photographerSelect');
+    sel.innerHTML = '<option value="">— Sélectionner —</option>';
+    [...db.photographers].sort().forEach(p => {
+        const o = document.createElement('option');
+        o.value = p; o.textContent = p;
+        if (p === currentPhoto) o.selected = true;
+        sel.appendChild(o);
+    });
+}
+
+function onPhotographerChange() {
+    currentPhoto = document.getElementById('photographerSelect').value;
+    const show = !!currentPhoto;
+    document.getElementById('counter-content').style.display  = show ? 'block' : 'none';
+    document.getElementById('no-photographer').style.display   = show ? 'none'  : 'block';
+    if (!show) return;
+    ensureActive();
+    refreshCounter();
+}
+
+// ── ACTIVE SESSION ─────────────────────────────────────────
+function ensureActive() {
+    if (!db.active[currentPhoto]) {
+        db.active[currentPhoto] = {
+            id: uid(), photographer: currentPhoto,
+            start: new Date().toISOString(), end: null,
+            active: true, approaches: []
+        };
+        save();
+    }
+}
+function getActive() { return db.active[currentPhoto] || null; }
+
+// ── RECORD / UNDO ──────────────────────────────────────────
+function record(booked) {
+    if (!currentPhoto) return;
+    ensureActive();
+    getActive().approaches.push({
+        ts: new Date().toISOString(), booked, loc: selectedLoc || null
+    });
+    save();
+    refreshCounter();
+    toast(booked ? '✅ Booking enregistré !' : '❌ Approche notée');
+}
+
+function undo() {
+    if (!currentPhoto) return;
+    const sess = getActive();
+    if (!sess || !sess.approaches.length) { toast('Rien à annuler'); return; }
+    sess.approaches.pop();
+    save();
+    refreshCounter();
+    toast('↩ Dernière entrée annulée');
+}
+
+// ── COUNTER UI ─────────────────────────────────────────────
+function refreshCounter() {
+    const sess = getActive();
+    if (!sess) return;
+    const s = stats(sess.approaches);
+    document.getElementById('convRate').textContent  = s.rate;
+    document.getElementById('statTotal').textContent  = s.total;
+    document.getElementById('statBooked').textContent = s.booked;
+    document.getElementById('statMissed').textContent = s.missed;
+    document.getElementById('sessionStart').textContent = fmtDT(sess.start);
+    document.getElementById('sessionNow').textContent   = fmtDT(new Date());
+}
+
+function startClock() {
+    clearInterval(clockTimer);
+    clockTimer = setInterval(() => {
+        if (currentPhoto) document.getElementById('sessionNow').textContent = fmtDT(new Date());
+    }, 30000);
+}
+
+// ── LOCATION PILLS ─────────────────────────────────────────
+function renderPills() {
+    const wrap = document.getElementById('locationPills');
+    wrap.innerHTML = '';
+    const all = ['', ...db.locations];
+    all.forEach(loc => {
+        const el = document.createElement('div');
+        el.className = 'location-pill' + (loc === selectedLoc ? ' active' : '');
+        el.textContent = loc || 'Aucun';
+        el.onclick = () => {
+            selectedLoc = loc;
+            document.querySelectorAll('.location-pill').forEach(p => p.classList.remove('active'));
+            el.classList.add('active');
+        };
+        wrap.appendChild(el);
+    });
+}
+
+// ── RESET ──────────────────────────────────────────────────
+function openResetModal() { openModal('resetModal'); }
+
+function confirmReset() {
+    if (!currentPhoto) return;
+    const sess = getActive();
+    if (sess) {
+        sess.end = new Date().toISOString();
+        sess.active = false;
+        db.sessions.push(sess);
+    }
+    delete db.active[currentPhoto];
+    save();
+    ensureActive();
+    refreshCounter();
+    closeModal('resetModal');
+    toast('Nouvelle session démarrée 🚀');
+}
+
+// ── HISTORY ────────────────────────────────────────────────
+function setFilter(f, el) {
+    histFilter = f;
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    renderHistory();
+}
+
+function renderHistory() {
+    const wrap = document.getElementById('historyContent');
+    wrap.innerHTML = '';
+
+    // All sessions: archived + active ones with at least 1 approach
+    const all = [
+        ...db.sessions,
+        ...Object.values(db.active).filter(s => s.approaches.length > 0)
+    ];
+
+    if (!all.length) {
+        wrap.innerHTML = '<div class="empty-state">Aucune session enregistrée pour l\'instant</div>';
+        return;
+    }
+
+    if (histFilter === 'sessions') {
+        all.sort((a,b) => new Date(b.start) - new Date(a.start));
+        all.forEach(sess => {
+            const s = stats(sess.approaches);
+            const div = document.createElement('div');
+            div.className = 'session-card';
+            div.innerHTML = `
+                <div class="session-card-top">
+                    <div>
+                        <div class="session-card-name">
+                            ${esc(sess.photographer)}
+                            ${sess.active ? ' <span style="color:var(--green);font-size:11px;font-weight:700">● EN COURS</span>' : ''}
+                        </div>
+                    </div>
+                    <div class="session-card-rate">${s.rate}</div>
+                </div>
+                <div class="session-card-dates">
+                    ${fmtDT(sess.start)} → ${sess.active ? 'En cours' : fmtDT(sess.end)}
+                </div>
+                <div class="session-card-stats">
+                    <div class="sstat">Approches: <span>${s.total}</span></div>
+                    <div class="sstat">Bookings: <span style="color:var(--green)">${s.booked}</span></div>
+                    <div class="sstat">Ratés: <span style="color:var(--red)">${s.missed}</span></div>
+                </div>`;
+            wrap.appendChild(div);
+        });
+
+    } else {
+        // Group by photographer
+        const byPhoto = {};
+        all.forEach(s => {
+            (byPhoto[s.photographer] = byPhoto[s.photographer] || []).push(s);
+        });
+        Object.keys(byPhoto).sort().forEach(name => {
+            const sessns = byPhoto[name];
+            const allApp = sessns.flatMap(s => s.approaches);
+            const s      = stats(allApp);
+            const div    = document.createElement('div');
+            div.className = 'photo-summary';
+            div.innerHTML = `
+                <div class="photo-summary-top">
+                    <div class="photo-summary-name">${esc(name)}</div>
+                    <div class="photo-summary-rate">${s.rate}</div>
+                </div>
+                <div class="photo-summary-stats">
+                    <div class="sstat">Approches: <span>${s.total}</span></div>
+                    <div class="sstat">Bookings: <span style="color:var(--green)">${s.booked}</span></div>
+                    <div class="sstat">Sessions: <span>${sessns.length}</span></div>
+                </div>`;
+            wrap.appendChild(div);
+        });
+    }
+}
+
+// ── SETTINGS ───────────────────────────────────────────────
+function renderSettings() {
+    // Photographers
+    const pList = document.getElementById('photographersList');
+    pList.innerHTML = '';
+    [...db.photographers].sort().forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'list-item';
+        div.innerHTML = `<span>${esc(p)}</span>
+            <button class="del-btn" onclick="deletePhotographer('${esc(p)}')">✕</button>`;
+        pList.appendChild(div);
+    });
+    // Locations
+    const lList = document.getElementById('locationsList');
+    lList.innerHTML = '';
+    db.locations.forEach(loc => {
+        const div = document.createElement('div');
+        div.className = 'list-item';
+        div.innerHTML = `<span>${esc(loc)}</span>
+            <button class="del-btn" onclick="deleteLocation('${esc(loc)}')">✕</button>`;
+        lList.appendChild(div);
+    });
+}
+
+function addPhotographer() {
+    const inp = document.getElementById('newPhotographerInput');
+    const name = inp.value.trim();
+    if (!name) return;
+    if (db.photographers.includes(name)) { toast('Prénom déjà présent'); return; }
+    db.photographers.push(name);
+    save();
+    inp.value = '';
+    renderSettings();
+    renderSelect();
+    toast(`${name} ajouté ✓`);
+}
+
+function deletePhotographer(name) {
+    if (currentPhoto === name) { toast('Ce photographe est actif, changez d\'abord'); return; }
+    db.photographers = db.photographers.filter(p => p !== name);
+    save();
+    renderSettings();
+    renderSelect();
+    toast('Photographe supprimé');
+}
+
+function addLocation() {
+    const inp = document.getElementById('newLocationInput');
+    const name = inp.value.trim();
+    if (!name) return;
+    if (db.locations.includes(name)) { toast('Lieu déjà présent'); return; }
+    db.locations.push(name);
+    save();
+    inp.value = '';
+    renderSettings();
+    renderPills();
+    toast(`${name} ajouté ✓`);
+}
+
+function deleteLocation(loc) {
+    db.locations = db.locations.filter(l => l !== loc);
+    if (selectedLoc === loc) selectedLoc = '';
+    save();
+    renderSettings();
+    renderPills();
+    toast('Lieu supprimé');
+}
+
+// ── CLEAR ALL ──────────────────────────────────────────────
+function openClearModal() { openModal('clearModal'); }
+function confirmClearAll() {
+    db = freshDB();
+    save();
+    currentPhoto = '';
+    selectedLoc  = '';
+    renderSelect();
+    renderPills();
+    renderSettings();
+    document.getElementById('counter-content').style.display = 'none';
+    document.getElementById('no-photographer').style.display = 'block';
+    closeModal('clearModal');
+    toast('Toutes les données effacées');
+}
+
+// ── EXPORT ─────────────────────────────────────────────────
+function openExportModal() {
+    const all = [
+        ...db.sessions,
+        ...Object.values(db.active).filter(s => s.approaches.length > 0)
+    ];
+    const byPhoto = {};
+    all.forEach(s => (byPhoto[s.photographer] = byPhoto[s.photographer] || []).push(s));
+
+    let txt  = `📸 PHconvertRate — Rapport\n`;
+    txt += `Date : ${fmtD(new Date())}\n`;
+    txt += `${'─'.repeat(32)}\n\n`;
+
+    if (!Object.keys(byPhoto).length) {
+        txt += 'Aucune donnée enregistrée.\n';
+    } else {
+        Object.keys(byPhoto).sort().forEach(name => {
+            const sessns = byPhoto[name];
+            const allApp = sessns.flatMap(s => s.approaches);
+            const s      = stats(allApp);
+            txt += `👤 ${name}\n`;
+            txt += `   Approches : ${s.total}  |  Bookings : ${s.booked}\n`;
+            txt += `   Taux de conversion : ${s.rate} : 1\n\n`;
+        });
+        txt += `${'─'.repeat(32)}\n`;
+        txt += `Total sessions : ${all.length}\n`;
+    }
+
+    document.getElementById('exportPreview').textContent = txt;
+    openModal('exportModal');
+}
+
+function shareExport() {
+    const txt = document.getElementById('exportPreview').textContent;
+    if (navigator.share) {
+        navigator.share({ title: 'PHconvertRate', text: txt }).catch(() => copyText(txt));
+    } else {
+        copyText(txt);
+    }
+}
+
+function copyText(txt) {
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(txt).then(() => toast('Copié dans le presse-papier ✓'));
+    } else {
+        const el = document.createElement('textarea');
+        el.value = txt; document.body.appendChild(el);
+        el.select(); document.execCommand('copy');
+        document.body.removeChild(el);
+        toast('Copié dans le presse-papier ✓');
+    }
+}
+
+// ── KEYBOARD ───────────────────────────────────────────────
+document.getElementById('newPhotographerInput').addEventListener('keydown', e => { if (e.key === 'Enter') addPhotographer(); });
+document.getElementById('newLocationInput').addEventListener('keydown',     e => { if (e.key === 'Enter') addLocation(); });
+
+// ── BOOT ───────────────────────────────────────────────────
+function init() {
+    renderSelect();
+    renderPills();
+    startClock();
+}
+
+init();
+</script>
+</body>
+</html>
